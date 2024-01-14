@@ -7,7 +7,7 @@ Via un algorithme de webscrapping, des informations relatives à ce véhicule se
 Sur la base de ces données, une valeur de marché sera également proposée.
 
 Etapes du projet
-1. Réalisation d'un POC sur jupyter notebook : [scrapping_eda](Webscrapping_&_Viz.ipynb) et [model_pricer](Model_training_&_pricer.ipynb)
+1. Réalisation d'un POC sur jupyter notebook : [scrapping_eda](/POC/Webscrapping_&_Viz.ipynb) et [model_pricer](/POC/Model_training_&_pricer.ipynb)
 3. Programmation du dashboard (sur la base des travaux développés dans les jupyter notebooks) ---> à faire
 4. Déploiement du dashboard ---> à faire
 
