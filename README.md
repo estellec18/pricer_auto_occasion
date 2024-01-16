@@ -20,6 +20,6 @@ Le dashboard se compose de 4 onglets:
 
 <img width="1422" alt="Vision_gene" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/9cc72df7-b105-4b01-af59-945ea74672d8">
 
-<img width="1397" alt="Spec_geo" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/44ef26cb-1d64-4b46-894b-b5c2f9fb251b">
+<img width="957" alt="geo_precis" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/e348d743-a5fc-4a86-a3f5-183fbdbd08e3">
 
 <img width="1006" alt="pricer" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/ea87c0c2-8021-4a5f-b7eb-b2f76f0655ad">
