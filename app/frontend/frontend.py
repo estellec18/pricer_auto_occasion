@@ -569,6 +569,7 @@ if mycheckb:
             data_car_filtred = filtre(
                 data_car, fil_trans, fil_carb, fil_loc, fil_vtyp, sort_by, sort_how
             )
+            st.markdown(f"{len(data_car_filtred)} véhicules correspondent à votre recherche.")
             st.dataframe(data_car_filtred)
 
     with tab5:
