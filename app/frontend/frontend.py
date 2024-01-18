@@ -12,6 +12,10 @@ import datetime
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error
 from joblib import load
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder
 
 from xgboost import XGBRegressor
 from sklearn.model_selection import KFold, GridSearchCV
@@ -31,6 +35,8 @@ colors_list = [
 ]
 
 prepro = load("preprocessor.joblib")
+prepro2 = load("preprocessor2.joblib")
+
 
 def pie_spec(df: pd.DataFrame, feat: str, ax: plt.Axes, titre: str, seuil: float):
     """Retourne un diagramme circulaire customisé : l'idée est de ne pas montrer les catégories qui seraient trop "petites" et
@@ -212,7 +218,15 @@ def viz_seller_geo(df: pd.DataFrame):
     return map_html
 
 
-def filtre(df:pd.DataFrame, trans:str, carb:str, seller_loc:str, seller_t:str, sort:str, croissant:str):
+def filtre(
+    df: pd.DataFrame,
+    trans: str,
+    carb: str,
+    seller_loc: str,
+    seller_t: str,
+    sort: str,
+    croissant: str,
+):
     """Retourne un dataframe filtré en fonction des éléments indiqués en input
 
     Args:
@@ -292,6 +306,58 @@ def train_test_preprocess1(df: pd.DataFrame, preprocessor):
     return X_train_scl, X_test_scl, y_train, y_test
 
 
+def train_test_preprocess2(df: pd.DataFrame, preprocessor):
+    """Preprocess les données collectées pour pouvoir les utiliser dans des algo de ML
+    (1) sépare les features de la target (X et y)
+    (2) One Hot encode les variables catégorielles (avant split du dataset pour être sûr qu'il n'y a pas de données inconnues dans test set) -- litérature pas clair sur le sujet
+    (3) scinde le dataset en training set et test set
+    (4) preprocess les données numériques en fonction de leur nature (gestion des valeurs manquantes différentes)
+
+    Args:
+        df (DataFrame): données collectées
+        preprocessor (pipeline sklearn): pour le preprocessing des données
+    Return:
+        X_train_scl et X_test_scl = les données du trainig et test set prétraitées
+        y_train et y_test = les response variables pour les deux sets
+    """
+    dfml = pd.DataFrame(
+        df
+    )  # pour pouvoir prend en compte les nan qui sont remplacés par un dico vide sinon
+    n = len(dfml)
+
+    drop_missing = ["kilometrage", "seller_location"]
+    dfml.dropna(subset=drop_missing, inplace=True)
+    print(f"Suppression de {n-len(dfml)} véhicules")
+
+    target = "prix"
+    X = dfml.drop(
+        columns=[target, "name"]
+    )  # suppression de la variable 'name' qui n'a pas d'interet pour le modèle
+    y = dfml[target]
+
+    cat = X.select_dtypes(include=['object']).columns.to_list()
+    cat_pipeline = Pipeline(steps=[
+        ('imputer', SimpleImputer(strategy='most_frequent')),
+        ('cat', OneHotEncoder(handle_unknown='ignore', drop='first',sparse_output=False)) 
+        ])
+    
+    OHE_preprocess = ColumnTransformer(transformers=[
+        ('cat',cat_pipeline,cat)],
+        verbose_feature_names_out=False,
+        remainder='passthrough')
+    
+    OHE_preprocess.set_output(transform='pandas')
+    X_ohe = OHE_preprocess.fit_transform(X)
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_ohe, y, test_size=0.1, random_state=12
+    )
+    X_train_scl = preprocessor.transform(X_train)
+    X_test_scl = preprocessor.transform(X_test)
+
+    return X_train_scl, X_test_scl, y_train, y_test, OHE_preprocess
+
+
 def search_best_model(model, X_train: np.array, y_train: np.array, param=None):
     """A partir d'un modèle et d'un ensemble de paramètre, retourne les paramètres donnant lieu aux meilleures performances
 
@@ -338,6 +404,7 @@ def pricer(
     type_vendeur: str,
     preprocessing,
     model_fitted,
+    OHE_preprocess=None
 ):
     """Prend les données input comme des features et les soumet au modèle pour obtenir la prédiction sur cette nouvelle instance
 
@@ -371,10 +438,13 @@ def pricer(
     }
 
     X_new = pd.DataFrame(new_data)
-    X_new_scl = preprocessing.transform(X_new)
+    if OHE_preprocess:
+        X_ohe = OHE_encoder.transform(X_new)
+        X_new_scl = preprocessing.transform(X_ohe)
+    else:
+        X_new_scl = preprocessing.transform(X_new)
     predictions = model_fitted.predict(X_new_scl)
     return predictions
-
 
 
 ################# SETTING DE L'APPLICATION #################
@@ -569,13 +639,16 @@ if mycheckb:
             data_car_filtred = filtre(
                 data_car, fil_trans, fil_carb, fil_loc, fil_vtyp, sort_by, sort_how
             )
-            st.markdown(f"{len(data_car_filtred)} véhicules correspondent à votre recherche.")
+            st.markdown(
+                f"{len(data_car_filtred)} véhicules correspondent à votre recherche."
+            )
             st.dataframe(data_car_filtred)
 
     with tab5:
         X_train_scl, X_test_scl, y_train, y_test = train_test_preprocess1(
             data_car, prepro
         )
+
         param_grid1 = {"learning_rate": [0.1, 0.2, 0.4, 0.6, 0.8, 1]}
         best_params = search_best_model(
             model=XGBRegressor(),
@@ -585,7 +658,7 @@ if mycheckb:
         )
         param_grid2 = {
             "learning_rate": [best_params["learning_rate"]],
-            "lambda": [50, 100, 120, 250],
+            "lambda": [20, 50, 100, 120, 250],
         }
         xgb_params = search_best_model(
             model=XGBRegressor(),
@@ -593,12 +666,11 @@ if mycheckb:
             y_train=y_train,
             param=param_grid2,
         )
+
         xgboost = fit_model(XGBRegressor(), xgb_params, X_train_scl, y_train)
-        # info qui apparaissent dans le terminal
+
         pred_final = xgboost.predict(X_test_scl)
         final_rmse = mean_squared_error(y_test, pred_final, squared=False)
-        print(f"RMSE: {final_rmse:.2f}")
-        print(f"Le RMSE représente {final_rmse/y_test.mean()*100:.2f}% du prix moyen des véhicules du test set")
 
         with st.form(key="info_to_submit"):
             col1, col2 = st.columns([0.5, 0.5], gap="medium")
@@ -638,6 +710,6 @@ if mycheckb:
             )
             current_date = datetime.date.today()
             st.markdown(
-                f'<p style="font-size:20px">Etant donné les informations communiquées, à la date du {current_date.day} {current_date.strftime("%b")} {current_date.year}, la valeur de marché de votre <span style="font-weight:bold">{user_marque} {user_modele}</span> est <span style="font-size:25px;font-weight:bold;color: #36C5F0">{estimation[0]:,.2f}€</span></p>',
+                f'<p style="font-size:20px">Etant donné les informations communiquées, à la date du {current_date.day} {current_date.strftime("%b")} {current_date.year}, la valeur de marché de votre <span style="font-weight:bold">{user_marque} {user_modele}</span> est <span style="font-size:25px;font-weight:bold;color: #36C5F0">{estimation[0]:,.2f}€</span> <span style="font-size:12px">(marge erreur +/-{final_rmse/y_test.mean()*100:.2f}%)</span></p>',
                 unsafe_allow_html=True,
             )
