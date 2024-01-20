@@ -35,7 +35,6 @@ colors_list = [
 ]
 
 prepro = load("preprocessor.joblib")
-prepro2 = load("preprocessor2.joblib")
 
 
 def pie_spec(df: pd.DataFrame, feat: str, ax: plt.Axes, titre: str, seuil: float):
