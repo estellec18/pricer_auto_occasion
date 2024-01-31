@@ -16,13 +16,13 @@ Le dashboard se compose de 4 onglets:
 - l'onglet "analyses graphiques" qui propose un certain nombres d'analyses graphiques à partir des données collectées
 - l'onglet "filtres personnalisés" qui permet à l'utilisateur de filtrer les données selon ses besoins
 - l'onglet "pricer" qui renvoie une valeur de marché du véhicule à partir des inputs de l'utilisateurs (kilométrage, puissance...)
-
+#
 <img width="1422" alt="Vision_gene" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/9cc72df7-b105-4b01-af59-945ea74672d8">
-
+#
 <img width="957" alt="geo_precis" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/e348d743-a5fc-4a86-a3f5-183fbdbd08e3">
-
+#
 <img width="1006" alt="pricer" src="https://github.com/estellec18/pricer_auto_occasion/assets/126951321/ea87c0c2-8021-4a5f-b7eb-b2f76f0655ad">
-
+#
 
 **LIMITES** :
 1. Les quantités de données récoltées pour un véhicules précis via le scrapping sont insuffisantes pour pouvoir entrainer convenablement un modèle, la marge d'erreur est donc beaucoup trop importante, ce qui rend le pricer pas suffisament pertinent.
