@@ -1,6 +1,6 @@
 # pricer_auto_occasion
 
-* projet élaboré pour s'entrainer au webscrapping*
+*projet élaboré pour s'entrainer au webscrapping*
 
 **OBJECTIF** : implémenter un pricer qui retourne la valeur de marché d'un véhicule d'occasion
 
