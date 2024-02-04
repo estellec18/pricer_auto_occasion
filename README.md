@@ -1,5 +1,7 @@
 # pricer_auto_occasion
 
+* projet élaboré pour s'entrainer au webscrapping*
+
 **OBJECTIF** : implémenter un pricer qui retourne la valeur de marché d'un véhicule d'occasion
 
 L'idée est de créer un dashboard sur lequel l'utilisateur pourra sélectionner le modèle de véhicule qui l'interesse (qu'il soit acheteur ou vendeur).
@@ -11,7 +13,7 @@ Etapes du projet
 2. Programmation du dashboard (sur la base des travaux développés dans les notebooks) : [script fastapi](/app/backend/main.py) et [script streamlit](/app/frontend/frontend.py), le tout dockerisé (avec docker compose)
 
 Le dashboard se compose de 4 onglets:
-- l'onglet générale sur lequel l'utilisateur a accès à toutes les informations collectées via le scrapping dans un tableau
+- l'onglet général sur lequel l'utilisateur a accès à toutes les informations collectées via le scrapping dans un tableau
 - l'onglet "pays d'origine" sur lequel l'utilisateur peut visualiser sur une carte le pays d'origine des véhicules disponibles
 - l'onglet "analyses graphiques" qui propose un certain nombres d'analyses graphiques à partir des données collectées
 - l'onglet "filtres personnalisés" qui permet à l'utilisateur de filtrer les données selon ses besoins
